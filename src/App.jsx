@@ -1,12 +1,20 @@
-import React from 'react';
-import LoginPage from './LoginPage.jsx'; // We are importing the new Login Page
+import React, { useState } from 'react';
+import LoginPage from './LoginPage.jsx';
+import SignupPage from './SignupPage.jsx'; // Import the new Signup Page
 import './index.css';
 
 function App() {
-  // For now, we are just showing the Login Page.
-  // Later, we will add logic to show the Dashboard after login.
+  const [isLoginPage, setIsLoginPage] = useState(true);
+
+  // This function will toggle between login and signup pages
+  const togglePage = () => {
+    setIsLoginPage(!isLoginPage);
+  };
+
   return (
-    <LoginPage />
+    <div>
+      {isLoginPage ? <LoginPage onSwitch={togglePage} /> : <SignupPage onSwitch={togglePage} />}
+    </div>
   );
 }
 
