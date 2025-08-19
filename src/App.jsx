@@ -1,31 +1,33 @@
 import React, { useState } from 'react';
 import LoginPage from './LoginPage.jsx';
 import SignupPage from './SignupPage.jsx';
-import Dashboard from './Dashboard.jsx'; // Import the new Dashboard
+import Dashboard from './Dashboard.jsx';
+import StockDetailPage from './StockDetailPage.jsx'; // Import the new page
 import './index.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Manages if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginPage, setIsLoginPage] = useState(true);
+  const [selectedStock, setSelectedStock] = useState(null); // To track selected stock
 
-  // This function will be called from LoginPage on successful login
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-  };
+  const handleLoginSuccess = () => setIsLoggedIn(true);
+  const togglePage = () => setIsLoginPage(!isLoginPage);
+  const handleStockSelect = (stock) => setSelectedStock(stock);
+  const handleBackToDashboard = () => setSelectedStock(null);
 
-  const togglePage = () => {
-    setIsLoginPage(!isLoginPage);
-  };
-
-  // If user is logged in, show Dashboard. Otherwise, show Login/Signup.
-  if (isLoggedIn) {
-    return <Dashboard />;
-  } else {
+  if (!isLoggedIn) {
+    // Show Login/Signup if not logged in
     return (
-      <div>
+       <div>
         {isLoginPage ? <LoginPage onSwitch={togglePage} onLoginSuccess={handleLoginSuccess} /> : <SignupPage onSwitch={togglePage} />}
       </div>
     );
+  } else if (selectedStock) {
+    // Show Stock Detail Page if a stock is selected
+    return <StockDetailPage stock={selectedStock} onBack={handleBackToDashboard} />;
+  } else {
+    // Show Dashboard if logged in and no stock is selected
+    return <Dashboard onStockSelect={handleStockSelect} />;
   }
 }
 
