@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import LoginPage from './LoginPage.jsx';
 import SignupPage from './SignupPage.jsx';
-import Dashboard from './Dashboard.jsx'; // Import the new Dashboard
+import Dashboard from './Dashboard.jsx';
+import StockDetailPage from './StockDetailPage.jsx';
 import './index.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginPage, setIsLoginPage] = useState(true);
+  const [selectedStock, setSelectedStock] = useState(null);
 
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-  };
+  const handleLoginSuccess = () => setIsLoggedIn(true);
+  const togglePage = () => setIsLoginPage(!isLoginPage);
+  const handleStockSelect = (stock) => setSelectedStock(stock);
+  const handleBackToDashboard = () => setSelectedStock(null);
 
-  const togglePage = () => {
-    setIsLoginPage(!isLoginPage);
-  };
-
-  if (isLoggedIn) {
-    return <Dashboard />;
+  if (!isLoggedIn) {
+    return <div>{isLoginPage ? <LoginPage onSwitch={togglePage} onLoginSuccess={handleLoginSuccess} /> : <SignupPage onSwitch={togglePage} />}</div>;
+  } else if (selectedStock) {
+    return <StockDetailPage stock={selectedStock} onBack={handleBackToDashboard} />;
   } else {
-    return (
-      <div>
-        {isLoginPage ? <LoginPage onSwitch={togglePage} onLoginSuccess={handleLoginSuccess} /> : <SignupPage onSwitch={togglePage} />}
-      </div>
-    );
+    return <Dashboard onStockSelect={handleStockSelect} />;
   }
 }
 
