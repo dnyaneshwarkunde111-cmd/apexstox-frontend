@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-// 'onSwitch' is a function to switch back to the login page
 export default function SignupPage({ onSwitch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    alert('Signup feature in progress!');
+    
+    const backendUrl = import.meta.env.VITE_API_URL;
+
+    try {
+      const response = await axios.post(`${backendUrl}/api/auth/register`, {
+        email,
+        password,
+      });
+      alert('Signup successful! Please login to continue.');
+      onSwitch(); // Switch to the login page
+    } catch (error) {
+      alert('Signup Failed: ' + (error.response?.data?.message || 'This email might already be in use.'));
+    }
   };
 
   return (
@@ -30,7 +42,7 @@ export default function SignupPage({ onSwitch }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
               placeholder="you@example.com"
             />
           </div>
@@ -41,7 +53,7 @@ export default function SignupPage({ onSwitch }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
               placeholder="••••••••"
             />
           </div>
@@ -52,13 +64,13 @@ export default function SignupPage({ onSwitch }) {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
               placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+            className="w-full py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700"
           >
             Create Account
           </button>
