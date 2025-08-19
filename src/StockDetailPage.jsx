@@ -1,54 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// We now receive the logged-in user's data as a prop
 export default function StockDetailPage({ stock, user, onBack }) {
   const [quantity, setQuantity] = useState(1);
   const [productType, setProductType] = useState('Delivery');
   const [livePrice, setLivePrice] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // This function runs when the page loads to get the live price
   useEffect(() => {
     const fetchLivePrice = async () => {
+      setIsLoading(true);
       try {
         const backendUrl = import.meta.env.VITE_API_URL;
         const response = await axios.get(`${backendUrl}/api/stocks/price?symbol=${stock.symbol}`);
         setLivePrice(response.data.price);
       } catch (error) {
         console.error("Failed to fetch live price", error);
-        setLivePrice('N/A'); // Set a default value on error
+        setLivePrice('N/A');
       }
       setIsLoading(false);
     };
-
     fetchLivePrice();
-  }, [stock.symbol]); // It re-runs if the stock symbol changes
+  }, [stock.symbol]);
 
-  // This function handles both buy and sell trades
   const handleTrade = async (tradeType) => {
-    if (quantity <= 0) {
-      alert("Quantity must be greater than zero.");
-      return;
-    }
-    if (livePrice === 'N/A' || !livePrice) {
-      alert("Could not fetch live price. Please try again later.");
-      return;
-    }
+    if (quantity <= 0) return alert("Quantity must be greater than zero.");
+    if (livePrice === 'N/A' || !livePrice) return alert("Could not fetch live price.");
 
     const tradeDetails = {
-      userId: user.id, // Using the real user ID
+      userId: user.id,
       symbol: stock.symbol,
       quantity: Number(quantity),
-      price: Number(livePrice), // Using the real-time price
-      productType: productType
+      price: Number(livePrice),
     };
 
     try {
       const backendUrl = import.meta.env.VITE_API_URL;
       const response = await axios.post(`${backendUrl}/api/trade/${tradeType}`, tradeDetails);
       alert(response.data.message);
-      onBack(); // Go back to dashboard after a successful trade
+      onBack();
     } catch (error) {
       alert("Trade failed: " + (error.response?.data?.message || "Server error"));
     }
