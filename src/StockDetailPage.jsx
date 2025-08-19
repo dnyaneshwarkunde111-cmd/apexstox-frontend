@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function StockDetailPage({ stock, user, onBack }) {
+export function StockDetailPage({ stock, user, onBack }) {
   const [quantity, setQuantity] = useState(1);
   const [productType, setProductType] = useState('Delivery');
   const [livePrice, setLivePrice] = useState(null);
@@ -49,7 +49,7 @@ export default function StockDetailPage({ stock, user, onBack }) {
       <header className="bg-gray-800 p-4 flex justify-between items-center">
         <button onClick={onBack} className="text-xl font-bold hover:text-blue-500">&larr; Back</button>
         <h1 className="text-xl font-bold">{stock.symbol}</h1>
-        <div><span>👤</span></div>
+        <div><span>👤 {user.email}</span></div>
       </header>
       <main className="p-8 grid grid-cols-3 gap-8">
         <div className="col-span-2">
