@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-export default function SignupPage({ onSwitch }) {
+export function SignupPage({ onSwitch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,12 +16,12 @@ export default function SignupPage({ onSwitch }) {
     const backendUrl = import.meta.env.VITE_API_URL;
 
     try {
-      const response = await axios.post(`${backendUrl}/api/auth/register`, {
+      await axios.post(`${backendUrl}/api/auth/register`, {
         email,
         password,
       });
       alert('Signup successful! Please login to continue.');
-      onSwitch(); // Switch to the login page
+      onSwitch();
     } catch (error) {
       alert('Signup Failed: ' + (error.response?.data?.message || 'This email might already be in use.'));
     }
