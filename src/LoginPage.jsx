@@ -1,13 +1,33 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // We need axios to talk to the backend
 
 // 'onSwitch' is a function to switch to the signup page
 export default function LoginPage({ onSwitch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
+  // This is the updated login function
+  const handleLogin = async (e) => {
     e.preventDefault();
-    alert('Login feature in progress!');
+    
+    // This is the address of our backend on Render
+    const backendUrl = import.meta.env.VITE_API_URL;
+
+    try {
+      // We are sending the email and password to our backend
+      const response = await axios.post(`${backendUrl}/api/auth/login`, {
+        email: email,
+        password: password,
+      });
+
+      // If login is successful
+      alert('Login Successful! Redirecting to dashboard...');
+      // Later, we will redirect the user: window.location.href = '/dashboard';
+
+    } catch (error) {
+      // If backend sends an error (e.g., wrong password)
+      alert('Login Failed: ' + (error.response?.data?.message || 'Please check your credentials.'));
+    }
   };
 
   return (
