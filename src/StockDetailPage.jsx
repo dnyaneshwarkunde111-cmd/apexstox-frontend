@@ -1,12 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-export default function StockDetailPage({ stock, onBack }) {
+// We now receive the logged-in user's data as a prop
+export default function StockDetailPage({ stock, user, onBack }) {
+  const [quantity, setQuantity] = useState(1);
+  const [productType, setProductType] = useState('Delivery');
+  const [livePrice, setLivePrice] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // This function runs when the page loads to get the live price
+  useEffect(() => {
+    const fetchLivePrice = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${backendUrl}/api/stocks/price?symbol=${stock.symbol}`);
+        setLivePrice(response.data.price);
+      } catch (error) {
+        console.error("Failed to fetch live price", error);
+        setLivePrice('N/A'); // Set a default value on error
+      }
+      setIsLoading(false);
+    };
+
+    fetchLivePrice();
+  }, [stock.symbol]); // It re-runs if the stock symbol changes
+
+  // This function handles both buy and sell trades
+  const handleTrade = async (tradeType) => {
+    if (quantity <= 0) {
+      alert("Quantity must be greater than zero.");
+      return;
+    }
+    if (livePrice === 'N/A' || !livePrice) {
+      alert("Could not fetch live price. Please try again later.");
+      return;
+    }
+
+    const tradeDetails = {
+      userId: user.id, // Using the real user ID
+      symbol: stock.symbol,
+      quantity: Number(quantity),
+      price: Number(livePrice), // Using the real-time price
+      productType: productType
+    };
+
+    try {
+      const backendUrl = import.meta.env.VITE_API_URL;
+      const response = await axios.post(`${backendUrl}/api/trade/${tradeType}`, tradeDetails);
+      alert(response.data.message);
+      onBack(); // Go back to dashboard after a successful trade
+    } catch (error) {
+      alert("Trade failed: " + (error.response?.data?.message || "Server error"));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 p-4 flex justify-between items-center">
-        <button onClick={onBack} className="text-xl font-bold hover:text-blue-500">
-          &larr; Back to Dashboard
-        </button>
+        <button onClick={onBack} className="text-xl font-bold hover:text-blue-500">&larr; Back</button>
         <h1 className="text-xl font-bold">{stock.symbol}</h1>
         <div><span>👤</span></div>
       </header>
@@ -14,7 +65,9 @@ export default function StockDetailPage({ stock, onBack }) {
         <div className="col-span-2">
           <div className="mb-4">
             <h2 className="text-3xl font-bold">{stock.instrument_name}</h2>
-            <p className="text-xl text-gray-400">{stock.exchange}</p>
+            <p className="text-xl text-gray-400">
+              Current Price: {isLoading ? 'Loading...' : `₹${livePrice}`}
+            </p>
           </div>
           <div className="bg-gray-800 rounded-lg p-4 h-96 mb-8">
             <p className="text-center text-gray-500">[Live TradingView Chart will be here]</p>
@@ -30,18 +83,27 @@ export default function StockDetailPage({ stock, onBack }) {
           <h3 className="text-2xl font-bold mb-4 text-center">Trade</h3>
           <div className="mb-4">
             <label className="block text-sm text-gray-400 mb-1">Quantity</label>
-            <input type="number" defaultValue="1" className="w-full p-2 bg-gray-700 rounded-md" />
+            <input 
+              type="number" 
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              className="w-full p-2 bg-gray-700 rounded-md" 
+            />
           </div>
           <div className="mb-6">
             <label className="block text-sm text-gray-400 mb-1">Product</label>
-            <select className="w-full p-2 bg-gray-700 rounded-md">
+            <select 
+              value={productType}
+              onChange={(e) => setProductType(e.target.value)}
+              className="w-full p-2 bg-gray-700 rounded-md"
+            >
               <option>Delivery</option>
               <option>Intraday</option>
             </select>
           </div>
           <div className="flex gap-4">
-            <button className="w-full py-3 font-bold bg-green-600 rounded-md hover:bg-green-700">BUY</button>
-            <button className="w-full py-3 font-bold bg-red-600 rounded-md hover:bg-red-700">SELL</button>
+            <button onClick={() => handleTrade('buy')} className="w-full py-3 font-bold bg-green-600 rounded-md hover:bg-green-700">BUY</button>
+            <button onClick={() => handleTrade('sell')} className="w-full py-3 font-bold bg-red-600 rounded-md hover:bg-red-700">SELL</button>
           </div>
         </div>
       </main>
