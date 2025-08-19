@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-export default function Dashboard({ onStockSelect }) {
+export function Dashboard({ user, onStockSelect }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +58,7 @@ export default function Dashboard({ onStockSelect }) {
             </ul>
           )}
         </div>
-        <div><span className="mr-4">👤</span></div>
+        <div><span className="mr-4">👤 {user.email}</span></div>
       </header>
       <main className="p-8">
         <h2 className="text-2xl font-semibold mb-4">Portfolio Summary</h2>
