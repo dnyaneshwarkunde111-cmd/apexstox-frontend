@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-// "export default function" se pichla error theek ho jayega
 export default function LoginPage({ onSwitch, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +13,6 @@ export default function LoginPage({ onSwitch, onLoginSuccess }) {
         email: email,
         password: password,
       });
-      // Login successful hone par user data App.jsx ko bhejein
       onLoginSuccess(response.data.user); 
     } catch (error) {
       alert('Login Failed: ' + (error.response?.data?.message || 'Please check your credentials.'));
