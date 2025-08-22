@@ -14,7 +14,8 @@ export default function StockDetailPage({ stock, user, onBack }) {
   const chartRef = useRef(null); // Chart instance ko store karne ke liye
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    // Agar chart library load nahi hui hai, toh aage na badhein
+    if (!LightweightCharts || !chartContainerRef.current) return;
 
     // Chart banayein
     const chart = LightweightCharts.createChart(chartContainerRef.current, {
