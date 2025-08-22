@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
+// Yeh Lightweight Charts library ko window object se access karega
 const LightweightCharts = window.LightweightCharts;
 
 export default function StockDetailPage({ stock, user, onBack }) {
@@ -10,38 +11,45 @@ export default function StockDetailPage({ stock, user, onBack }) {
   const [isLoading, setIsLoading] = useState(true);
   
   const chartContainerRef = useRef();
-  const chartRef = useRef(null);
+  const chartRef = useRef(null); // Chart instance ko store karne ke liye
 
   useEffect(() => {
-    if (!chartContainerRef.current || !LightweightCharts) return;
+    // Agar chart library load nahi hui hai ya container मौजूद nahi hai, toh aage na badhein
+    if (!LightweightCharts || !chartContainerRef.current) return;
 
+    // Chart banayein
     const chart = LightweightCharts.createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: 384,
+        height: 384, // h-96
         layout: {
-            backgroundColor: '#1f2937',
+            backgroundColor: '#1f2937', // gray-800
             textColor: 'rgba(255, 255, 255, 0.9)',
         },
         grid: {
-            vertLines: { color: '#374151' },
-            horzLines: { color: '#374151' },
+            vertLines: { color: '#374151' }, // gray-700
+            horzLines: { color: '#374151' }, // gray-700
         },
-        crosshair: { mode: 1 },
-        rightPriceScale: { borderColor: '#4b5563' },
-        timeScale: { borderColor: '#4b5563' },
+        crosshair: { mode: 1 }, // CrosshairMode.Normal
+        rightPriceScale: { borderColor: '#4b5563' }, // gray-600
+        timeScale: { borderColor: '#4b5563' }, // gray-600
     });
     
     chartRef.current = chart;
 
     const candleSeries = chart.addCandlestickSeries({
-      upColor: '#22c55e', downColor: '#ef4444', borderDownColor: '#ef4444',
-      borderUpColor: '#22c55e', wickDownColor: '#ef4444', wickUpColor: '#22c55e',
+      upColor: '#22c55e', // green-500
+      downColor: '#ef4444', // red-500
+      borderDownColor: '#ef4444',
+      borderUpColor: '#22c55e',
+      wickDownColor: '#ef4444',
+      wickUpColor: '#22c55e',
     });
 
     const fetchStockData = async () => {
       setIsLoading(true);
       const backendUrl = import.meta.env.VITE_API_URL;
       
+      // Live Price Fetch Karein
       try {
         const priceResponse = await axios.get(`${backendUrl}/api/stocks/price?symbol=${stock.symbol}`);
         setLivePrice(priceResponse.data.price);
@@ -50,8 +58,10 @@ export default function StockDetailPage({ stock, user, onBack }) {
         setLivePrice('N/A');
       }
 
+      // Chart ke liye Historical Data Fetch Karein
       try {
         const historyResponse = await axios.get(`${backendUrl}/api/stocks/historical_data?symbol=${stock.symbol}`);
+        // API se mile data ko date ke hisaab se sort karein
         const chartData = historyResponse.data.sort((a, b) => new Date(a.time) - new Date(b.time));
         candleSeries.setData(chartData);
       } catch (error) {
@@ -63,6 +73,7 @@ export default function StockDetailPage({ stock, user, onBack }) {
 
     fetchStockData();
 
+    // Cleanup function jab component unmount ho
     return () => {
         if (chartRef.current) {
             chartRef.current.remove();
@@ -72,8 +83,14 @@ export default function StockDetailPage({ stock, user, onBack }) {
   }, [stock.symbol]);
 
   const handleTrade = async (tradeType) => {
-    if (quantity <= 0) return alert("Quantity must be greater than zero.");
-    if (livePrice === 'N/A' || !livePrice) return alert("Could not fetch live price.");
+    if (quantity <= 0) {
+      alert("Quantity must be greater than zero.");
+      return;
+    }
+    if (livePrice === 'N/A' || !livePrice) {
+      alert("Could not fetch live price. Please try again later.");
+      return;
+    }
 
     const tradeDetails = {
       userId: user.id,
@@ -86,7 +103,7 @@ export default function StockDetailPage({ stock, user, onBack }) {
       const backendUrl = import.meta.env.VITE_API_URL;
       const response = await axios.post(`${backendUrl}/api/trade/${tradeType}`, tradeDetails);
       alert(response.data.message);
-      onBack();
+      onBack(); // Trade ke baad dashboard par wapas jaayein
     } catch (error) {
       alert("Trade failed: " + (error.response?.data?.message || "Server error"));
     }
@@ -95,9 +112,13 @@ export default function StockDetailPage({ stock, user, onBack }) {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 p-4 flex justify-between items-center">
-        <button onClick={onBack} className="text-xl font-bold hover:text-blue-500">&larr; Back</button>
+        <button onClick={onBack} className="text-xl font-bold hover:text-blue-500">
+          &larr; Back
+        </button>
         <h1 className="text-xl font-bold">{stock.symbol}</h1>
-        <div><span>👤 {user.email}</span></div>
+        <div>
+          <span className="mr-4">👤 {user.email}</span>
+        </div>
       </header>
       <main className="p-8 grid grid-cols-3 gap-8">
         <div className="col-span-2">
@@ -108,7 +129,9 @@ export default function StockDetailPage({ stock, user, onBack }) {
             </p>
           </div>
           
-          <div ref={chartContainerRef} className="bg-gray-800 rounded-lg h-96 mb-8 w-full"></div>
+          <div ref={chartContainerRef} className="bg-gray-800 rounded-lg h-96 mb-8 w-full">
+            {/* Chart yahan par library se banega */}
+          </div>
 
           <div>
             <h3 className="text-2xl font-semibold mb-4">Latest News</h3>
