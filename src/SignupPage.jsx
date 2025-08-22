@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-export function SignupPage({ onSwitch }) {
+// "export default function" se pichla error theek ho jayega
+export default function SignupPage({ onSwitch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,7 +22,7 @@ export function SignupPage({ onSwitch }) {
         password,
       });
       alert('Signup successful! Please login to continue.');
-      onSwitch();
+      onSwitch(); // Signup ke baad login page par switch karein
     } catch (error) {
       alert('Signup Failed: ' + (error.response?.data?.message || 'This email might already be in use.'));
     }
