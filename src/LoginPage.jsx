@@ -4,10 +4,14 @@ import axios from 'axios';
 export default function LoginPage({ onSwitch, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const backendUrl = import.meta.env.VITE_API_URL;
+    setIsLoading(true);
+    
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    
     try {
       const response = await axios.post(`${backendUrl}/api/auth/login`, {
         email: email,
@@ -16,6 +20,8 @@ export default function LoginPage({ onSwitch, onLoginSuccess }) {
       onLoginSuccess(response.data.user); 
     } catch (error) {
       alert('Login Failed: ' + (error.response?.data?.message || 'Please check your credentials.'));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -34,7 +40,7 @@ export default function LoginPage({ onSwitch, onLoginSuccess }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:bg-gray-600 transition-colors"
               placeholder="you@example.com"
             />
           </div>
@@ -45,15 +51,16 @@ export default function LoginPage({ onSwitch, onLoginSuccess }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:bg-gray-600 transition-colors"
               placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            disabled={isLoading}
+            className="w-full py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
         <div className="flex items-center justify-center space-x-2">
@@ -62,9 +69,14 @@ export default function LoginPage({ onSwitch, onLoginSuccess }) {
           <hr className="w-full border-gray-600" />
         </div>
         <button
-          className="w-full py-3 font-bold text-black bg-white rounded-md flex items-center justify-center space-x-2"
+          className="w-full py-3 font-bold text-black bg-white rounded-md flex items-center justify-center space-x-2 hover:bg-gray-100 transition-colors"
         >
-          <svg className="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.901,36.626,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+          <svg className="w-5 h-5" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.901,36.626,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+          </svg>
           <span>Sign in with Google</span>
         </button>
          <p className="text-center text-gray-400">
