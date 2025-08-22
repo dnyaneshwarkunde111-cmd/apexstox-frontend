@@ -1,14 +1,9 @@
-/*
-============================================================
-File: src/App.jsx (Updated Version)
-============================================================
-*/
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginPage from './LoginPage.jsx';
 import SignupPage from './SignupPage.jsx';
 import Dashboard from './Dashboard.jsx';
 import StockDetailPage from './StockDetailPage.jsx';
-import Footer from './Footer.jsx'; // Footer ko import karein
+import Footer from './Footer.jsx';
 import './index.css';
 
 function App() {
@@ -16,7 +11,15 @@ function App() {
   const [isLoginPage, setIsLoginPage] = useState(true);
   const [selectedStock, setSelectedStock] = useState(null);
 
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
   const handleLoginSuccess = (loggedInUser) => {
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
   };
 
@@ -32,7 +35,6 @@ function App() {
     setSelectedStock(null);
   };
 
-  // Page content ko decide karne ke liye ek variable
   let pageContent;
   if (!user) {
     pageContent = isLoginPage ? <LoginPage onSwitch={togglePage} onLoginSuccess={handleLoginSuccess} /> : <SignupPage onSwitch={togglePage} />;
@@ -43,10 +45,10 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      <div className="flex-grow">
+    <div className="flex flex-col min-h-screen bg-gray-900">
+      <main className="flex-grow">
         {pageContent}
-      </div>
+      </main>
       <Footer />
     </div>
   );
