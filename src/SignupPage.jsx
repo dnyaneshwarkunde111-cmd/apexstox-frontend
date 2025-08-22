@@ -5,6 +5,7 @@ export default function SignupPage({ onSwitch }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -13,7 +14,8 @@ export default function SignupPage({ onSwitch }) {
       return;
     }
     
-    const backendUrl = import.meta.env.VITE_API_URL;
+    setIsLoading(true);
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     try {
       await axios.post(`${backendUrl}/api/auth/register`, {
@@ -24,6 +26,8 @@ export default function SignupPage({ onSwitch }) {
       onSwitch();
     } catch (error) {
       alert('Signup Failed: ' + (error.response?.data?.message || 'This email might already be in use.'));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -42,7 +46,7 @@ export default function SignupPage({ onSwitch }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:bg-gray-600 transition-colors"
               placeholder="you@example.com"
             />
           </div>
@@ -53,7 +57,7 @@ export default function SignupPage({ onSwitch }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:bg-gray-600 transition-colors"
               placeholder="••••••••"
             />
           </div>
@@ -64,15 +68,16 @@ export default function SignupPage({ onSwitch }) {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md"
+              className="w-full p-3 mt-1 text-white bg-gray-700 rounded-md focus:bg-gray-600 transition-colors"
               placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            disabled={isLoading}
+            className="w-full py-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
         <p className="text-center text-gray-400">
