@@ -14,7 +14,6 @@ export default function StockDetailPage({ stock, user, onBack }) {
   const chartRef = useRef(null); // Chart instance ko store karne ke liye
 
   useEffect(() => {
-    // Agar chart container nahi hai, toh aage na badhein
     if (!chartContainerRef.current) return;
 
     // Chart banayein
