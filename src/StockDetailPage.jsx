@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { createChart, CrosshairMode } from 'lightweight-charts';
 
 export default function StockDetailPage({ stock, user, onBack }) {
   const [quantity, setQuantity] = useState(1);
@@ -13,13 +14,12 @@ export default function StockDetailPage({ stock, user, onBack }) {
   useEffect(() => {
     // Wait for LightweightCharts to be available and ensure proper initialization
     const initChart = () => {
-      if (!chartContainerRef.current || !window.LightweightCharts) {
-        console.log('Waiting for LightweightCharts to load...');
+      if (!chartContainerRef.current) {
         return;
       }
 
       try {
-        const chart = window.LightweightCharts.createChart(chartContainerRef.current, {
+        const chart = createChart(chartContainerRef.current, {
             width: chartContainerRef.current.clientWidth,
             height: 384,
             layout: {
@@ -30,7 +30,7 @@ export default function StockDetailPage({ stock, user, onBack }) {
                 vertLines: { color: '#374151' },
                 horzLines: { color: '#374151' },
             },
-            crosshair: { mode: window.LightweightCharts.CrosshairMode.Normal },
+            crosshair: { mode: CrosshairMode.Normal },
             rightPriceScale: { borderColor: '#4b5563' },
             timeScale: { borderColor: '#4b5563' },
         });
@@ -80,29 +80,11 @@ export default function StockDetailPage({ stock, user, onBack }) {
       }
     };
 
-    // Check if library is already loaded
-    if (window.LightweightCharts) {
-      initChart();
-    } else {
-      // Wait for the library to load with timeout
-      let attempts = 0;
-      const maxAttempts = 50; // 5 seconds max wait
-      
-      const checkLibrary = setInterval(() => {
-        attempts++;
-        if (window.LightweightCharts) {
-          clearInterval(checkLibrary);
-          initChart();
-        } else if (attempts >= maxAttempts) {
-          clearInterval(checkLibrary);
-          console.error('LightweightCharts failed to load');
-          setIsLoading(false);
-        }
-      }, 100);
+    // Initialize chart immediately using ESM import
+    initChart();
 
-      // Cleanup interval if component unmounts
-      return () => clearInterval(checkLibrary);
-    }
+    // No interval needed; library is bundled via ESM
+
 
     return () => {
         if (chartRef.current) {
